@@ -73,10 +73,16 @@ def item_endpoint(key):
 @app.route("/vulnerable_echo")
 def vulnerable_echo():
     name = request.args.get("name", "")
-    # WARNING: raw insertion - this is intentionally vulnerable for the exercise
-    html = f"<h2>Hello {name}</h2>"
-    return html, 200, {"Content-Type": "text/html; charset=utf-8"}
+    safe_name = escape(name)
 
+    html = f"<html><head><title>Echo</title></head><body><h2>Hello {safe_name}</h2></body></html>"
+    headers = {
+        "Content-Type": "text/html; charset=utf-8",
+        # blocks inline scripts; adjust if you later need external scripts
+        "Content-Security-Policy": "default-src 'self'; script-src 'self'"
+    }
+    return html, 200, headers
+    
 # "Safe" echo uses escaping
 @app.route("/safe_echo")
 def safe_echo():
